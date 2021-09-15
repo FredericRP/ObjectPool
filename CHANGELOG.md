@@ -6,10 +6,13 @@ For 1.2.2 release and previous ones, this is a copy/paste from FredericRP's Stan
 
 ## Unreleased
 
+## [1.3.0] - 2021-09-15
+
 ### Fixed
 - Prevent exception if using GetObjectPool method when there is no existing pool
 
 ### Changed
+- Use its own repository
 - Do not use GUIDs for assembly references to make it clearer if an assembly is not found
 
 ## [1.2.2] - 2021-07-30
