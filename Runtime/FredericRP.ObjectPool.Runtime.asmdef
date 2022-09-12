@@ -1,7 +1,9 @@
 {
     "name": "FredericRP.ObjectPool.Runtime",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "FredericRP.StringDataList.Runtime"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

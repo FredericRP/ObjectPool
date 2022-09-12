@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
-using System;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
-using System.Collections;
+#if FRP_DATA_LIST
+// Optionnal library
+using FredericRP.StringDataList;
+#endif
 
 namespace FredericRP.ObjectPooling
 {
@@ -10,17 +11,23 @@ namespace FredericRP.ObjectPooling
   [System.Serializable]
   public class ObjectPool : MonoBehaviour
   {
+    public const int MAX_BUFFER = 1000;
     /// <summary>
     /// An object pool can not be instantiated and is not a Singleton neither.
     /// Instead, you can use the GetObjectPool method to retrieve the one you want to use.
     /// It allows to have multiple pools in your game without having to link them manually
     /// </summary>
-    #region Object Pool handling
+#region Object Pool handling
+#if FRP_DATA_LIST
+    // Allow to select from a pool id list using data list
+    // To enable this, you must have the StringDataList package installed and add "FRP_DATA_LIST" in the list of the Scripting Define Symbols of the project
+    [Select("PoolId")]
+#endif
     public string id = "pool";
 
     private static List<ObjectPool> objectPoolList;
 
-    public static ObjectPool GetObjectPool(string id)
+    public static ObjectPool GetObjectPool(string id = "pool")
     {
       return objectPoolList?.Find(element => element.id.Equals(id));
     }
@@ -38,7 +45,7 @@ namespace FredericRP.ObjectPooling
     }
 
     protected ObjectPool() { }
-    #endregion
+#endregion
 
     [System.Serializable]
     public class PoolGameObjectInfo
