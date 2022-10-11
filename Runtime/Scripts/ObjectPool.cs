@@ -45,7 +45,7 @@ namespace FredericRP.ObjectPooling
     }
 
     protected ObjectPool() { }
-#endregion
+    #endregion
 
     [System.Serializable]
     public class PoolGameObjectInfo
@@ -53,6 +53,11 @@ namespace FredericRP.ObjectPooling
       /// <summary>
       /// Identifier of the object
       /// </summary>
+#if FRP_DATA_LIST
+      // Allow to select from a object id list using data list
+      // To enable this, you must have the StringDataList package installed and add "FRP_DATA_LIST" in the Scripting Define Symbols in player settings
+      [Select("ObjectId")]
+#endif      
       public string id;
       /// <summary>
       /// The actual prefab to instantiate
@@ -171,39 +176,8 @@ namespace FredericRP.ObjectPooling
       return null;
     }
 
-    /// <summary>
-    /// Gets a new object for the name type provided.  If no object of that type in the pool then <c>null</c> will be returned.
-    /// </summary>
-    /// <returns>
-    /// The object for request prefab name.
-    /// </returns>
-    /// <param name='objectName'>
-    /// Object prefab name
-    /// </param>
-    public GameObject GetFromPool(string objectName)
-    {
-      return GetFromPool(objectName, false);
-    }
 
-    /// <summary>
-    /// Gets a new object for the name type provided.  If no object type exists or if onlypooled is true and there is no objects of that type in the pool
-    /// then null will be returned.
-    /// </summary>
-    /// <returns>
-    /// The object for type.
-    /// </returns>
-    /// <param name='objectType'>
-    /// Object type.
-    /// </param>
-    /// <param name='onlyPooled'>
-    /// If true, it will only return an object if there is one currently pooled.
-    /// </param>
-    public GameObject GetFromPool(string objectName, bool onlyPooled)
-    {
-      return GetFromPool(objectName, onlyPooled, true);
-    }
-
-    GameObject InstantiateObject(PoolGameObjectInfo poolObject)
+    T InstantiateObject<T>(PoolGameObjectInfo poolObject)
     {
       Transform parent = poolObject.defaultParent != null ? poolObject.defaultParent : transform;
       GameObject newObj = Instantiate(poolObject.prefab, parent) as GameObject;
@@ -214,8 +188,9 @@ namespace FredericRP.ObjectPooling
       }
       newObj.transform.localScale = Vector3.one;
       newObj.name = poolObject.id;
-      return newObj;
+      return newObj.GetComponent<T>();
     }
+
 
     /// <summary>
     /// Gets a new object for the name type provided.  If no object type exists or if onlypooled is true and there is no objects of that type in the pool
@@ -224,13 +199,34 @@ namespace FredericRP.ObjectPooling
     /// <returns>
     /// The object for type.
     /// </returns>
+    /// <param name='objectName'>
+    /// Object name (id)
+    /// </param>
+    /// <param name='onlyPooled'>
+    /// If true, it will only return an object if there is one currently pooled, null otherwise.
+    /// </param>
+    /// <param name="activate">
+    /// If true, activate the object before returning it, otherwise, let it disabled.
+    /// </param>
+    public GameObject GetFromPool(string objectName, bool onlyPooled = false, bool activate = true)
+    {
+      return GetFromPool<GameObject>(objectName, onlyPooled, activate);
+    }
+
+    /// <summary>
+    /// Gets a new object for the name type provided.  If no object type exists or if onlypooled is true and there is no objects of that type in the pool
+    /// then null will be returned.
+    /// </summary>
+    /// <returns>
+    /// The object for given type.
+    /// </returns>
     /// <param name='objectType'>
     /// Object type.
     /// </param>
     /// <param name='onlyPooled'>
     /// If true, it will only return an object if there is one currently pooled.
     /// </param>
-    public GameObject GetFromPool(string objectName, bool onlyPooled, bool activate)
+    public T GetFromPool<T>(string objectName, bool onlyPooled = false, bool activate = true)
     {
       PoolGameObjectInfo poolObject = poolObjectList.Find(element => objectName.StartsWith(element.id));
       bool objectPrefabExists = (poolObject != null);
@@ -238,7 +234,7 @@ namespace FredericRP.ObjectPooling
 #if UNITY_EDITOR
       // Don't get from pool while in editor and not playing
       if (!Application.isPlaying)
-        return InstantiateObject(poolObject);
+        return InstantiateObject<T>(poolObject);
 #endif
 
       if (objectPrefabExists)
@@ -253,23 +249,23 @@ namespace FredericRP.ObjectPooling
             pooledObjects[objectName].RemoveAt(0);
             pooledObject.SetActive(activate);
             pooledObject.transform.SetParent(poolObject.defaultParent);
-            return pooledObject;
+            return pooledObject.GetComponent<T>();
           }
 
-          return InstantiateObject(poolObject);
+          return InstantiateObject<T>(poolObject);
         }
         else if (!onlyPooled)
         {
           if (poolObject != null)
           {
-            return InstantiateObject(poolObject);
+            return InstantiateObject<T>(poolObject);
           }
 
-          return null;
+          return default(T);
         }
       }
       // If we have gotten here either there was no object of the specified type or none were left in the pool with onlyPooled set to true
-      return null;
+      return default(T);
     }
 
     /// <summary>

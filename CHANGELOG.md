@@ -6,6 +6,16 @@ For 1.2.2 release and previous ones, this is a copy/paste from FredericRP's Stan
 
 ## Unreleased
 
+## [1.3.1] - 2021-10-12
+
+### Added
+- GetFromPool can now be a generic to retrieve a component from the prefab directly, as the generic version of Instantiate do
+- Ability to use StringDataList for **pools id** and **object ids** when FRP_DATA_LIST is added in scripting define symbols (player settings)
+
+### Changed
+- the object pool inspector uses SerializedProperty now instead of old target direct link to object.
+- updated documentation for simpler setup and examples of usage
+
 ## [1.3.0] - 2021-09-15
 
 ### Fixed
